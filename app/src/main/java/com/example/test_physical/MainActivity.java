@@ -20,10 +20,12 @@ public class MainActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         helper = new dbHelper(this);
         db = helper.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM contacts", null);
         startManagingCursor(cursor);
+
         String[] from = { "name", "tel" };
         int[] to = { android.R.id.text1, android.R.id.text2 };
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_2, cursor, from, to);
