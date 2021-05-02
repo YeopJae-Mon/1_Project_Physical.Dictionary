@@ -1,59 +1,236 @@
 package com.example.test_physical;
 
+import android.app.Activity;
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.PopupMenu;
+import android.widget.SearchView;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Bundle;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    dbHelper helper;
-    SQLiteDatabase db;
-    EditText edit_name, edit_tel;
+    private static int EDIT_REQUEST = 1001; // 편집요청
+    private static int INSERT_REQUEST = 1002; // 삽입요청
+    private static int EDIT_RESULT = 2001; // 편집반환
+    private static int INSERT_RESULT = 2002; // 삽입반환
+
+    private DBHelper mDBHelper;
+    private TextView mTxtTitle; // 메모제못
+    private TextView mTxtText;  // 메모내용
+    private ListView mListView; // 리스트뷰
+    private SearchView mSearchView; // 검색뷰
+
+    private ArrayAdapter<MemoRecord> mListAdapter;
+    private ArrayList<MemoRecord> mMemoList = null; // 메모 목록
+    public SearchView.OnQueryTextListener queryTextListner = (new SearchView.OnQueryTextListener() {
+
+        @Override
+        public boolean onQueryTextSubmit(String text) {
+
+            if (text != null && text.length() > 0) {
+                mMemoList = mDBHelper.getMemoList(text);
+                if (mMemoList != null)
+                    displayListView(MainActivity.this, mMemoList);
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+
+            if (newText != null && newText.length() <= 0) {
+
+                // 약간의 딜레이를(0.3초 정도면 충분) 주고 키보드를 없애야 한다. ㅋㅋ
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        mSearchView.clearFocus(); // 검색뷰 키보드 사라지기
+                        mSearchView.setIconified(true); // 아이콘화 시키기 (검색뷰 닫기 효과);
+                    }
+                }, 300); // 0.3초 delay
+
+                display();
+            }
+            return false;
+        }
+    });
+    /**
+     * 리스트뷰 클릭 이벤트
+     */
+    private AdapterView.OnItemClickListener mListClickListener = (new AdapterView.OnItemClickListener() {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            if (mMemoList == null) return;
+
+            Intent intent = new Intent(MainActivity.this, MemoView.class);
+            intent.putExtra("DB_ID", mMemoList.get(position).id); // 데이터베이스 ID 넘김
+            startActivity(intent); // 인텐트 호출
+        }
+    });
+    /**
+     * 리스트뷰 롱클릭 이벤트
+     */
+    private AdapterView.OnItemLongClickListener mListLongClickListener = (new AdapterView.OnItemLongClickListener() {
+
+        @Override
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+            showPopupMenu(view, position); // 팝업 보이기
+            return true;
+        }
+    });
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        helper = new dbHelper(this);
-        db = helper.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM contacts", null);
-        startManagingCursor(cursor);
+        mListView = findViewById(R.id.lvMemo); // 리스트 뷰
+        mListView.setOnItemClickListener(mListClickListener); // 리스트 클릭 리스너
+        mListView.setOnItemLongClickListener(mListLongClickListener); // 리스트 롱클릭 리스너
 
-        String[] from = { "name", "tel" };
-        int[] to = { android.R.id.text1, android.R.id.text2 };
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_2, cursor, from, to);
-        ListView list = (ListView) findViewById(R.id.list);
-        list.setAdapter(adapter);
+        mDBHelper = new DBHelper(this);
 
-    }
-}
-
-class dbHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "test.db";
-    private static final int DATABASE_VERSION = 2;
-
-    public dbHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        // 시스템에 DB가 없을 경우
+        if (mDBHelper.checkDatabase() == false) {
+            mDBHelper.copyDatabaseFromAsset(); // Asset의 DB를 시스템에 복사
+        }
+        display();
     }
 
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE contacts ( _id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "name TEXT, tel TEXT);");
-        for (int i = 0; i < 10; i++) {
-            db.execSQL("INSERT INTO contacts VALUES (null, " + "'김철수 " + i
-                    + "'" + ", '010-1234-100" + i + "');");
+    private void display() {
+
+        mMemoList = mDBHelper.getMemoList(); // 전체목록검색
+        if (mMemoList != null) {
+            displayListView(this, mMemoList);
+            // mListAdapter.notifyDataSetChanged(); // 리스트 변경 통보
         }
     }
 
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS contacts");
-        onCreate(db);
+    private void displayListView(final Activity context, ArrayList<MemoRecord> list) {
+
+        class ViewHolder {
+            TextView txtTitle;
+            TextView txtMemo;
+            TextView txtTimestamp;
+        }
+
+        mListAdapter = new ArrayAdapter<MemoRecord>(this, R.layout.memo_custom, list) {
+
+            ViewHolder holder = null; // 뷰홀더 객체
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+                LayoutInflater inflater = context.getLayoutInflater();
+
+                if (convertView == null) {
+                    holder = new ViewHolder();
+                    convertView = inflater.inflate(R.layout.memo_custom, parent, false);
+
+                    holder.txtTitle = convertView.findViewById(R.id.txtTitle);
+                    holder.txtMemo = convertView.findViewById(R.id.txtText);
+                    holder.txtTimestamp = convertView.findViewById(R.id.txtTimestamp);
+                    convertView.setTag(holder); // view 객체의 태그로 ViewHolder 지정
+                } else {
+                    holder = (ViewHolder) convertView.getTag(); // 태그를 가져옴
+                }
+
+                if (holder != null) {
+                    holder.txtTitle.setText(mMemoList.get(position).title); // 제목
+                    holder.txtMemo.setText(mMemoList.get(position).text); // 메모내용
+                    holder.txtTimestamp.setText(Util.convertToDateTimeStr(mMemoList.get(position).timeStamp)); // 날짜
+                }
+                return convertView;
+            }
+        };
+
+        mListView.setAdapter(mListAdapter);
+    }
+
+    // 팝업 메뉴
+    private void showPopupMenu(final View v, final int position) {
+
+        PopupMenu popup = new PopupMenu(this, v);
+        popup.getMenu().add(0, 0, 0, "삭제");
+        popup.getMenu().add(0, 1, 0, "편집");
+
+        // 팝업 이벤트 처리
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+
+                if (item.getItemId() == 0) { // 삭제
+                    mDBHelper.deleteMemo(mMemoList.get(position).id);
+                    display(); // 다시 디스플레이
+                } else if (item.getItemId() == 1) { // 편집
+                    Intent intent = new Intent(MainActivity.this, MemoView.class);
+                    intent.putExtra("EDIT_REQUEST", true); // 편집요청
+                    intent.putExtra("DB_ID", mMemoList.get(position).id); // 데이터베이스 ID 넘김
+                    startActivityForResult(intent, EDIT_REQUEST); // 인텐트 호출
+                }
+
+                return true;
+            }
+        });
+
+        popup.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == EDIT_RESULT || resultCode == INSERT_RESULT) {
+            display(); // 화면 갱신
+        }
+    }
+
+    // 옵션 메뉴
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.memo_options, menu); // 액션바 추가
+
+        SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        mSearchView = (SearchView) menu.findItem(R.id.app_bar_search).getActionView();
+        mSearchView.setOnQueryTextListener(queryTextListner); // 검색 뷰 이벤트 리스너
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.app_bar_search:
+                return true;
+            case R.id.option_search:
+                Intent intent = new Intent(MainActivity.this, MemoView.class);
+                intent.putExtra("INSERT_REQUEST", true); // 삽입 요청
+                startActivityForResult(intent, INSERT_REQUEST); // 인텐트 호출
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
