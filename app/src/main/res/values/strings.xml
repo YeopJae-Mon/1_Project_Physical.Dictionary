@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">TEST_Physical</string>
+    <string name="memoTitle">나의 메모앱</string>
+    <string name="txtTitle">제목</string>
+    <string name="txtMemo">메모내용</string>
+    <string name="txtTimestamp">시간</string>
+    <string name="btnOK">변경</string>
+    <string name="option_search">검색</string>
+    <string name="option_insert">메모 삽입</string>
+    <string name="title_hint">제목을 입력하세요.</string>
+    <string name="memo_hint">내용을 입력하세요.</string>
 </resources>
