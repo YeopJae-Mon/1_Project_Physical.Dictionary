@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (mMemoList == null) return;
 
-            Intent intent = new Intent(MainActivity.this, MemoView.class);
+            Intent intent = new Intent(MainActivity.this, MemoIn.class);
             intent.putExtra("DB_ID", mMemoList.get(position).id); // 데이터베이스 ID 넘김
             startActivity(intent); // 인텐트 호출
         }
