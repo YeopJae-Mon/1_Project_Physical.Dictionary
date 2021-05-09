@@ -16,9 +16,9 @@ public class MemoIn extends AppCompatActivity {
         Intent intent = getIntent();
         mDB_ID = intent.getIntExtra("DB_ID", 0);
 
-        if(mDB_ID == 1){setContentView(R.layout.memo_view);}
-        if(mDB_ID == 1){setContentView(R.layout.memo_view);}
-        if(mDB_ID == 1){setContentView(R.layout.memo_view);}
+        if(mDB_ID == 1){setContentView(R.layout.train_1);}
+        if(mDB_ID == 2){setContentView(R.layout.train_2);}
+        if(mDB_ID == 3){setContentView(R.layout.train_3);}
     }
 
 }

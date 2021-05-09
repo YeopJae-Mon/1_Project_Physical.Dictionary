@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffb"
+    android:weightSum="1">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="222222"
+        android:gravity="center_horizontal"
+        android:textSize="60dp"
+        android:layout_marginTop="80dp"
+        android:id="@+id/text01"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="센서사용 연습용"
+        android:gravity="center_horizontal"
+        android:textSize="40sp"
+        android:layout_marginTop="40dp"
+        android:id="@+id/text02"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="로딩중...."
+        android:gravity="center_horizontal"
+        android:textSize="40sp"
+        android:layout_marginTop="40dp"
+        android:id="@+id/text03"/>
+
+</LinearLayout>
