@@ -23,14 +23,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    private static int EDIT_REQUEST = 1001; // 편집요청
     private static int INSERT_REQUEST = 1002; // 삽입요청
     private static int EDIT_RESULT = 2001; // 편집반환
     private static int INSERT_RESULT = 2002; // 삽입반환
 
     private DBHelper mDBHelper;
-    private TextView mTxtTitle; // 메모제못
-    private TextView mTxtText;  // 메모내용
     private ListView mListView; // 리스트뷰
     private SearchView mSearchView; // 검색뷰
 
@@ -85,18 +82,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent); // 인텐트 호출
         }
     });
-    /**
-     * 리스트뷰 롱클릭 이벤트
-     */
-    private AdapterView.OnItemLongClickListener mListLongClickListener = (new AdapterView.OnItemLongClickListener() {
-
-        @Override
-        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
-            showPopupMenu(view, position); // 팝업 보이기
-            return true;
-        }
-    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
 
         mListView = findViewById(R.id.lvMemo); // 리스트 뷰
         mListView.setOnItemClickListener(mListClickListener); // 리스트 클릭 리스너
-        mListView.setOnItemLongClickListener(mListLongClickListener); // 리스트 롱클릭 리스너
 
         mDBHelper = new DBHelper(this);
 
@@ -131,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
         class ViewHolder {
             TextView txtTitle;
             TextView txtMemo;
-            TextView txtTimestamp;
         }
 
         mListAdapter = new ArrayAdapter<MemoRecord>(this, R.layout.memo_custom, list) {
@@ -149,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
 
                     holder.txtTitle = convertView.findViewById(R.id.txtTitle);
                     holder.txtMemo = convertView.findViewById(R.id.txtText);
-                    holder.txtTimestamp = convertView.findViewById(R.id.txtTimestamp);
                     convertView.setTag(holder); // view 객체의 태그로 ViewHolder 지정
                 } else {
                     holder = (ViewHolder) convertView.getTag(); // 태그를 가져옴
@@ -158,43 +140,12 @@ public class MainActivity extends AppCompatActivity {
                 if (holder != null) {
                     holder.txtTitle.setText(mMemoList.get(position).title); // 제목
                     holder.txtMemo.setText(mMemoList.get(position).text); // 메모내용
-                    holder.txtTimestamp.setText(Util.convertToDateTimeStr(mMemoList.get(position).timeStamp)); // 날짜
                 }
                 return convertView;
             }
         };
 
         mListView.setAdapter(mListAdapter);
-    }
-
-    // 팝업 메뉴
-    private void showPopupMenu(final View v, final int position) {
-
-        PopupMenu popup = new PopupMenu(this, v);
-        popup.getMenu().add(0, 0, 0, "삭제");
-        popup.getMenu().add(0, 1, 0, "편집");
-
-        // 팝업 이벤트 처리
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-
-                if (item.getItemId() == 0) { // 삭제
-                    mDBHelper.deleteMemo(mMemoList.get(position).id);
-                    display(); // 다시 디스플레이
-                } else if (item.getItemId() == 1) { // 편집
-                    Intent intent = new Intent(MainActivity.this, MemoView.class);
-                    intent.putExtra("EDIT_REQUEST", true); // 편집요청
-                    intent.putExtra("DB_ID", mMemoList.get(position).id); // 데이터베이스 ID 넘김
-                    startActivityForResult(intent, EDIT_REQUEST); // 인텐트 호출
-                }
-
-                return true;
-            }
-        });
-
-        popup.show();
     }
 
     @Override
