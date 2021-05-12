@@ -2,7 +2,6 @@ package com.example.test_physical;
 
 import java.io.EOFException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,13 +9,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Locale;
-
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Environment;
-import android.util.Log;
 
 public class DBHelper {
     private String DB_PATH;							// database 경로
@@ -65,9 +60,8 @@ public class DBHelper {
             Integer id = c.getInt(0);		// id
             String title = c.getString(1);	// 제목
             String text = c.getString(2);	// 텍스트
-            Long timeStamp = c.getLong(3); 	// 타임스탬프
 
-            list.add(new MemoRecord(id, title, text, timeStamp));
+            list.add(new MemoRecord(id, title, text));
         }
 
         if(c.getCount() <= 0) return null;
@@ -95,9 +89,8 @@ public class DBHelper {
             Integer id = c.getInt(0);		// id
             String title = c.getString(1);	// 제목
             String text = c.getString(2);	// 텍스트
-            Long timeStamp = c.getLong(3); 	// 타임스탬프
 
-            list.add(new MemoRecord(id, title, text, timeStamp));
+            list.add(new MemoRecord(id, title, text));
         }
 
         if(c.getCount() <= 0) return null;
@@ -125,9 +118,8 @@ public class DBHelper {
             Integer id = c.getInt(0);
             String title = c.getString(1);
             String text = c.getString(2);
-            Long timeStamp = c.getLong(3);
 
-            list = new MemoRecord(id, title, text, timeStamp);
+            list = new MemoRecord(id, title, text);
         }
 
         if(c.getCount() <= 0) return null;

@@ -5,7 +5,7 @@ public class MemoRecord {
     public String title; // 제목
     public String text; // 텍스트
 
-    public MemoRecord(Integer id, String title, String text, Long timestamp) {
+    public MemoRecord(Integer id, String title, String text) {
         this.id = id;
         this.title = title;
         this.text = text;

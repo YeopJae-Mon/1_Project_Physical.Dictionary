@@ -1,8 +1,6 @@
 package com.example.test_physical;
 
 import android.app.Activity;
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,12 +12,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.PopupMenu;
 import android.widget.SearchView;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -64,6 +59,21 @@ public class MainActivity extends AppCompatActivity {
 
                 display();
             }
+            else{
+                // 약간의 딜레이를(0.3초 정도면 충분) 주고 키보드를 없애야 한다. ㅋㅋ
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        mSearchView.clearFocus(); // 검색뷰 키보드 사라지기
+                        mSearchView.setIconified(true); // 아이콘화 시키기 (검색뷰 닫기 효과);
+                    }
+                }, 300); // 0.3초 delay
+
+                display();
+            }
+
             return false;
         }
     });
@@ -163,8 +173,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.memo_options, menu); // 액션바 추가
-
-        SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         mSearchView = (SearchView) menu.findItem(R.id.app_bar_search).getActionView();
         mSearchView.setOnQueryTextListener(queryTextListner); // 검색 뷰 이벤트 리스너
         return true;
