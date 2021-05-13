@@ -14,6 +14,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayAdapter<MemoRecord> mListAdapter;
     private ArrayList<MemoRecord> mMemoList = null; // 메모 목록
+
     public SearchView.OnQueryTextListener queryTextListner = (new SearchView.OnQueryTextListener() {
 
         @Override
@@ -37,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
                 mMemoList = mDBHelper.getMemoList(text);
                 if (mMemoList != null)
                     displayListView(MainActivity.this, mMemoList);
+                else{ mMemoList = mDBHelper.getMemoList();
+                    displayListView(MainActivity.this, mMemoList);
+                    Toast.makeText(MainActivity.this, "검색된 데이타가 없습니다.", Toast.LENGTH_LONG).show();}
             }
             return false;
         }
@@ -46,20 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
             if (newText != null && newText.length() <= 0) {
 
-                // 약간의 딜레이를(0.3초 정도면 충분) 주고 키보드를 없애야 한다. ㅋㅋ
-                new Handler().postDelayed(new Runnable() {
-
-                    @Override
-                    public void run() {
-
-                        mSearchView.clearFocus(); // 검색뷰 키보드 사라지기
-                        mSearchView.setIconified(true); // 아이콘화 시키기 (검색뷰 닫기 효과);
-                    }
-                }, 300); // 0.3초 delay
-
-                display();
-            }
-            else{
                 // 약간의 딜레이를(0.3초 정도면 충분) 주고 키보드를 없애야 한다. ㅋㅋ
                 new Handler().postDelayed(new Runnable() {
 
