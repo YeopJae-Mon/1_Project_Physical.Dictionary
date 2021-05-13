@@ -176,10 +176,6 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.app_bar_search:
                 return true;
-            case R.id.option_search:
-                Intent intent = new Intent(MainActivity.this, MemoView.class);
-                intent.putExtra("INSERT_REQUEST", true); // 삽입 요청
-                startActivityForResult(intent, INSERT_REQUEST); // 인텐트 호출
             default:
                 return super.onOptionsItemSelected(item);
         }

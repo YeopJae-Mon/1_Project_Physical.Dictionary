@@ -17,7 +17,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity"/>
-        <activity android:name="MemoView" android:parentActivityName=".MainActivity" />
         <activity android:name="MemoIn" android:parentActivityName=".MainActivity" />
     </application>
 
