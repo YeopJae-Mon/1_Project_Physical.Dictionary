@@ -20,7 +20,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    private static int INSERT_REQUEST = 1002; // 삽입요청
     private static int EDIT_RESULT = 2001; // 편집반환
     private static int INSERT_RESULT = 2002; // 삽입반환
 
